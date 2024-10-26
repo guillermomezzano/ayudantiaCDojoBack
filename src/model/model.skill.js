@@ -7,7 +7,6 @@ const skillSchema = new Schema({
   },
   id_reference: {
     type: String,
-    unique: true,
   },
 
   nivel: {

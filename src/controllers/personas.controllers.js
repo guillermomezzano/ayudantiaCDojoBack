@@ -15,10 +15,10 @@ const getAllPerson = async (req, res) => {
 
 const addPerson = async (req, res) => {
   console.log(req);
-  // const { nombre, apellido, nacionalidad } = req.body;
-  // if (!nombre || !apellido || !nacionalidad) {
-  //   return res.status(400).json({ message: "faltan campos" });
-  // }
+  const { nombre, apellido, nacionalidad } = req.body;
+  if (!nombre || !apellido || !nacionalidad) {
+    return res.status(400).json({ message: "faltan campos" });
+  }
   try {
     const newPerson = await Person.create(req.body);
     return res.status(201).json(newPerson);
