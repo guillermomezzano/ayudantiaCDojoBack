@@ -13,35 +13,38 @@ const getAllPerson = async (req, res) => {
   }
 };
 
-const addPerson = async (req, res) => {
+const addPerson = async (req, res, next) => {
   console.log(req);
-  const { nombre, apellido, nacionalidad } = req.body;
-  if (!nombre || !apellido || !nacionalidad) {
-    return res.status(400).json({ message: "faltan campos" });
-  }
+  // const { nombre, apellido, nacionalidad } = req.body;
+  // if (!nombre || !apellido || !nacionalidad) {
+  //   return res.status(400).json({ message: "faltan campos" });
+  // }
   try {
     const newPerson = await Person.create(req.body);
     return res.status(201).json(newPerson);
   } catch (error) {
     console.log(error);
-    return res.json({
-      message: "Error al crear la persona",
-      error: error.message,
-    });
+    next(error);
+    // return res.json({
+    //   message: "Error al crear la persona",
+    //   error: error.message,
+    // });
   }
 };
 
-const getOnePerson = async (req, res) => {
+const getOnePerson = async (req, res, next) => {
   console.log(req);
   try {
     const persona = await Person.findOne({ _id: req.params.id });
+    if (!persona) {
+      const error = new Error("usario no encontrado id incorrecto");
+      error.statusCode = 400;
+      throw error;
+    }
     return res.status(200).json(persona);
   } catch (error) {
     console.log(error);
-    return res.json({
-      message: "Error al crear la persona",
-      error: error.message,
-    });
+    next(error);
   }
 };
 
