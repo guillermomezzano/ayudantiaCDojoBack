@@ -1,6 +1,7 @@
 import { model, Schema } from "mongoose";
 import uniqueValidator from "mongoose-unique-validator";
 import { skillSchema } from "./model.skill.js";
+import bcrypt from "bcrypt";
 
 const personaSchema = new Schema({
   nombre: {
@@ -30,7 +31,40 @@ const personaSchema = new Schema({
       message: "el email no es correcto",
     },
   },
+
+  password: {
+    type: String,
+    required: [true, "password no puede estar vacio"],
+    minLength: [8, "debe tener un minimo de 8 caracteres"],
+  },
+
   skill: [skillSchema],
+});
+
+// Agregar campo virtual para confirmación de clave secreta
+personaSchema
+  .virtual("confirmPassword")
+  .get(function () {
+    return this._confirmPassword;
+  })
+  .set(function (value) {
+    this._confirmPassword = value;
+  });
+
+// Gancho de pre-validación para verificar si las claves secretas coinciden
+personaSchema.pre("validate", function (next) {
+  if (this.password !== this.confirmPassword) {
+    this.invalidate("confirmPassword", "Las claves secretas deben coincidir");
+  }
+  next();
+});
+
+// Gancho de pre-guardado para hashear la clave secreta
+personaSchema.pre("save", function (next) {
+  bcrypt.hash(this.password, 10).then((hash) => {
+    this.password = hash;
+    next();
+  });
 });
 
 personaSchema.plugin(uniqueValidator);
